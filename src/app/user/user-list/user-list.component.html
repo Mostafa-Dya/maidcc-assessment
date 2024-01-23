@@ -1,0 +1,69 @@
+<div *ngIf="loading" class="loader-container flex items-center justify-center h-full">
+    <app-loader></app-loader>
+</div>
+
+
+<div class="user-list-container px-11 pt-24" [@fadeInOut]>
+    <div class="flex justify-center items-center mb-4">
+        <h2 class="text-2xl font-bold ">Users List</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3  gap-4">
+        <div *ngFor="let user of getDisplayedUsers()"
+             class="user-card bg-white p-4 shadow rounded-md justify-center"
+             [routerLink]="['/users', user.id]">
+            <img [src]="user.avatar" alt="Avatar" class="w-16 h-16 rounded-full mx-auto mb-4">
+            <p class="text-center text-lg font-semibold">{{ user.first_name }} {{ user.last_name }}</p>
+            <p class="text-center text-gray-500">{{ user.email }}</p>
+        </div>
+    </div>
+    
+    <div class="text-align flex items-center justify-center py-10 lg:px-0 sm:px-6 px-4">
+        <div class="lg:w-3/5 w-full  flex items-center justify-between border-t border-gray-200">
+            <div class="flex items-center pt-3 text-gray-600 hover:text-indigo-700 cursor-pointer"
+                (click)="onPrevious()">
+                <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.1665 4H12.8332" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M1.1665 4L4.49984 7.33333" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M1.1665 4.00002L4.49984 0.666687" stroke="currentColor" stroke-width="1.25"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <p class="text-sm ml-3 font-medium leading-none">Previous</p>
+            </div>
+
+            <div class="sm:flex hidden">
+                <ng-container *ngFor="let page of generatePageArray()">
+                    <p (click)="onPageClick(page)"
+                    class="text-sm font-medium leading-none cursor-pointer"
+                    [ngClass]="{
+                      'text-indigo-700': page === currentPage,
+                      'text-gray-600': page !== currentPage,
+                      'border-t': true,
+                      'border-transparent': page !== currentPage,
+                      'border-indigo-400': page === currentPage,
+                      'hover:border-indigo-400': page !== currentPage,
+                      'pt-3': true,
+                      'mr-4': true,
+                      'px-2': true
+                    }">
+                        {{ page }}
+                    </p>
+                </ng-container>
+            </div>
+
+            <div class="flex items-center pt-3 text-gray-600 hover:text-indigo-700 cursor-pointer" (click)="onNext()">
+                <p class="text-sm font-medium leading-none mr-3">Next</p>
+                <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.1665 4H12.8332" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M9.5 7.33333L12.8333 4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M9.5 0.666687L12.8333 4.00002" stroke="currentColor" stroke-width="1.25"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
