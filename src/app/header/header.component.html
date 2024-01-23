@@ -18,21 +18,31 @@
 
     </div>
     <div class="absolute mt-2 w-full max-h-72 overflow-y-auto bg-white border rounded-lg shadow-md transition-max-height duration-300 ease-in-out"
-        *ngIf="isDropdownVisible">
-        <div *ngIf="dropdownUsers.length > 0; else notFoundMessage">
-            <div *ngFor="let user of dropdownUsers" class="py-2 px-4 cursor-pointer hover:bg-gray-100" 
-            [routerLink]="['/users', user.id]">
-                <div class="flex items-center">
-                    <img [src]="user.avatar" alt="Avatar" class="w-16 h-16 rounded-full mr-2">
-                    <div class="ml-6">
-                        <p class="text-sm font-medium">{{ user.first_name }} {{ user.last_name }}</p>
-                        <p class="text-xs text-gray-500">{{ user.email }}</p>
-                    </div>
-                </div>
+    *ngIf="isDropdownVisible">
+    <ng-container *ngIf="isLoading; else content">
+      <!-- Display loader when loading data -->
+      <app-loader class="overflow-hidden"></app-loader>
+    </ng-container>
+
+    <ng-template #content>
+      <div *ngIf="dropdownUsers.length > 0; else notFoundMessage">
+        <!-- Display user list when users are available -->
+        <div *ngFor="let user of dropdownUsers" class="py-2 px-4 cursor-pointer hover:bg-gray-100" 
+          [routerLink]="['/users', user.id]">
+          <div class="flex items-center">
+            <img [src]="user.avatar" alt="Avatar" class="w-16 h-16 rounded-full mr-2">
+            <div class="ml-6">
+              <p class="text-sm font-medium">{{ user.first_name }} {{ user.last_name }}</p>
+              <p class="text-xs text-gray-500">{{ user.email }}</p>
             </div>
+          </div>
         </div>
-        <ng-template #notFoundMessage>
-            <div class="py-2 px-4 text-gray-500">User ID not found</div>
-        </ng-template>
-    </div>
+      </div>
+      
+      <ng-template #notFoundMessage>
+        <!-- Display "User ID not found" message when no users are found -->
+        <div class="py-2 px-4 text-gray-500">User ID not found</div>
+      </ng-template>
+    </ng-template>
+  </div>
 </div>

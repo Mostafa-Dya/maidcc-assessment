@@ -33,7 +33,7 @@ export class UserService {
         const params = new HttpParams().set('page', page.toString());
         return this.http.get<any>(`${environment.api}/users`, { params });
       });
-
+      console.log(this.allUsers)
       return forkJoin(requests);
     } else {
       // If 'pages' is a single number, make a single request
