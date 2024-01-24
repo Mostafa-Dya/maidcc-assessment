@@ -29,13 +29,14 @@ export class HeaderComponent {
       debounceTime(500),
       distinctUntilChanged(),
       switchMap(term => {
-        if (term === '') {
+        if (term === '' && this.isDropdownVisible) {
+          // Show entire user list from cache when the search term is empty
           this.dropdownUsers = this.userService.allUsers;
           this.isLoading = false; // Set loading state to false when data is loaded
         } else {
+          // Make the API call only if the search term is not empty
           this.dropdownUsers = this.userService.allUsers.filter(user => user.id.toString() === term.trim());
           this.isLoading = false; // Set loading state to false when data is loaded
-
         }
         return [];
       })
@@ -48,6 +49,7 @@ export class HeaderComponent {
       }
     );
   }
+  
 
   // Handle focus event on the input, showing the dropdown and subscribing to search
   onInputFocus() {
