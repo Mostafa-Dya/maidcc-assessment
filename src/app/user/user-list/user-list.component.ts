@@ -57,7 +57,7 @@ export class UserListComponent {
       // If not in the cache or total_pages has changed, proceed with the HTTP request
       this.userService.getUserCards(this.currentPage).pipe(
         takeUntil(this.destroy$),
-        debounceTime(300) // Adjust the debounce time as needed
+        debounceTime(800) // Adjust the debounce time as needed
       ).subscribe(
         (response) => {
           this.handleUserCardsResponse(response, cacheKey);
