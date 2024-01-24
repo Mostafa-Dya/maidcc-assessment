@@ -12,7 +12,8 @@ export class UserService {
   // BehaviorSubject for handling search term changes
   private searchSubject = new BehaviorSubject<string>('');
   search$ = this.searchSubject.asObservable();
-  
+  private lastKnownTotalPages = 0; // New variable to store the last known total pages
+
   // Injecting HttpClient and CachingService
   http = inject(HttpClient)
   constructor(private cachingService: CachingService) { }
@@ -33,7 +34,6 @@ export class UserService {
         const params = new HttpParams().set('page', page.toString());
         return this.http.get<any>(`${environment.api}/users`, { params });
       });
-      console.log(this.allUsers)
       return forkJoin(requests);
     } else {
       // If 'pages' is a single number, make a single request
@@ -72,5 +72,14 @@ export class UserService {
   // Get cached user cards for a specific cache key
   getCachedUserCards(cacheKey: string): any {
     return this.cachingService.get(cacheKey);
+  }
+
+  hasTotalPagesChanged(totalPages: number): boolean {
+    // If lastKnownTotalPages is zero, consider it as changed to force the initial request
+    return this.lastKnownTotalPages !== totalPages && this.lastKnownTotalPages !== 0;
+  }
+
+  updateLastKnownTotalPages(totalPages: number): void {
+    this.lastKnownTotalPages = totalPages;
   }
 }
