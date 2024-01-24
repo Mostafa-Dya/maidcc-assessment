@@ -29,7 +29,7 @@ export class HeaderComponent {
       debounceTime(500),
       distinctUntilChanged(),
       switchMap(term => {
-        if (term.trim() === '') {
+        if (term === '') {
           this.dropdownUsers = this.userService.allUsers;
           this.isLoading = false; // Set loading state to false when data is loaded
         } else {
