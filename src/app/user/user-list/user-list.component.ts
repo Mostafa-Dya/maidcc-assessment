@@ -4,6 +4,7 @@ import { SharedServiceModule } from '../../shared-service/shared-service.module'
 import { Subject, takeUntil } from 'rxjs';
 import { fadeInOutAnimation } from '../../animation/fadeInOutAnimation';
 import { ChangeDetectorRef } from '@angular/core';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-user-list',
@@ -44,6 +45,7 @@ export class UserListComponent {
     // Check if data is in the cache
     const cacheKey = `userCards-${this.currentPage}`;
     const cachedData = this.userService.getCachedUserCards(cacheKey);
+
     if (cachedData && !this.userService.hasTotalPagesChanged(cachedData.total_pages)) {
       // Use cached data if total_pages hasn't changed
       this.displayedUsers = [...cachedData.data];
@@ -54,7 +56,8 @@ export class UserListComponent {
     } else {
       // If not in the cache or total_pages has changed, proceed with the HTTP request
       this.userService.getUserCards(this.currentPage).pipe(
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
+        debounceTime(300) // Adjust the debounce time as needed
       ).subscribe(
         (response) => {
           this.handleUserCardsResponse(response, cacheKey);
