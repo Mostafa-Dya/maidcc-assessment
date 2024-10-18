@@ -1,47 +1,74 @@
-<div class='max-w-md mx-auto mt-11 relative'>
-    <div class="relative flex items-center w-full h-12 rounded-lg focus-within:shadow-lg bg-white overflow-hidden">
-        <div class="grid place-items-center h-full w-12 text-gray-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-        </div>
-
-        <input [(ngModel)]="searchTerm" (ngModelChange)="onInputChange($event)"
-        appNumericInput
-        (focus)="onInputFocus()"
-        (blur)="onInputBlur()"
-        class="peer h-full w-full outline-none text-sm text-gray-700 pr-2"
-        type="text"
-        id="search"
-        placeholder="Search by ID..." />
-
+<div class="max-w-md mx-auto mt-11 relative">
+  <div
+    class="relative flex items-center w-full h-12 rounded-lg focus-within:shadow-lg bg-white overflow-hidden"
+  >
+    <div class="grid place-items-center h-full w-12 text-gray-300">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
     </div>
-    <div class="absolute mt-2 w-full max-h-72 overflow-y-auto bg-white border rounded-lg shadow-md transition-max-height duration-300 ease-in-out"
-    *ngIf="isDropdownVisible">
+
+    <input
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onInputChange($event)"
+      (focus)="onInputFocus()"
+      (blur)="onInputBlur()"
+      class="peer h-full w-full outline-none text-sm text-gray-700 pr-2"
+      type="text"
+      id="search"
+      placeholder="Search by ID or Name..."
+    />
+  </div>
+  <div
+    class="absolute mt-2 w-full max-h-72 overflow-y-auto bg-white border rounded-lg shadow-md transition-max-height duration-300 ease-in-out"
+    *ngIf="isDropdownVisible"
+    style="z-index: 999!important;"
+  >
     <ng-container *ngIf="isLoading; else content">
       <!-- Display loader when loading data -->
       <app-loader class="overflow-hidden"></app-loader>
     </ng-container>
 
-    <ng-template #content>
+    <ng-template #content class="z-50">
       <div *ngIf="dropdownUsers.length > 0; else notFoundMessage">
         <!-- Display user list when users are available -->
-        <div *ngFor="let user of dropdownUsers" class="py-2 px-4 cursor-pointer hover:bg-gray-100" 
-          [routerLink]="['/users', user.id]">
+        <div
+          *ngFor="let user of dropdownUsers"
+          class="py-2 px-4 cursor-pointer hover:bg-gray-100"
+          [routerLink]="['/users', user.id]"
+        >
           <div class="flex items-center">
-            <img [src]="user.avatar" alt="Avatar" class="w-16 h-16 rounded-full mr-2">
+            <img
+              [src]="user.avatar"
+              alt="Avatar"
+              class="w-16 h-16 rounded-full mr-2"
+            />
             <div class="ml-6">
-              <p class="text-sm font-medium">{{ user.first_name }} {{ user.last_name }}</p>
+              <p class="text-sm font-medium">
+                {{ user.first_name }} {{ user.last_name }}
+              </p>
               <p class="text-xs text-gray-500">{{ user.email }}</p>
             </div>
           </div>
         </div>
       </div>
-      
+
       <ng-template #notFoundMessage>
         <!-- Display "User ID not found" message when no users are found -->
-        <div class="py-2 px-4 text-gray-500">User ID not found</div>
+        <div *ngIf="searchTerm != ''" class="py-2 px-4 text-gray-500">
+          User ID not found
+        </div>
       </ng-template>
     </ng-template>
   </div>

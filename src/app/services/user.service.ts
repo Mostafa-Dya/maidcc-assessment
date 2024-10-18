@@ -1,85 +1,36 @@
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
 import { environment } from '../../environments/environment.development';
-import { BehaviorSubject, Observable, forkJoin, tap } from 'rxjs';
-import { CachingService } from './caching.service';
+import { map, Observable } from 'rxjs';
+import { User } from '../store/models/user.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
+  constructor(private http: HttpClient) {}
 
-  // BehaviorSubject for handling search term changes
-  private searchSubject = new BehaviorSubject<string>('');
-  search$ = this.searchSubject.asObservable();
-  private lastKnownTotalPages = 0; // New variable to store the last known total pages
-
-  // Injecting HttpClient and CachingService
-  http = inject(HttpClient)
-  constructor(private cachingService: CachingService) { }
-
-  // Array to store all users
-  public allUsers: any[] = []; 
-
-  // Set the search term and notify subscribers
-  setSearchTerm(term: string) {
-    this.searchSubject.next(term);
-  }
-  
-  // Fetch user cards based on page(s)
-  getUserCards(pages: number[] | number): Observable<any> {
-    if (Array.isArray(pages)) {
-      // If 'pages' is an array, make multiple requests using forkJoin
-      const requests = pages.map(page => {
-        const params = new HttpParams().set('page', page.toString());
-        return this.http.get<any>(`${environment.api}/users`, { params });
-      });
-      return forkJoin(requests);
-    } else {
-      // If 'pages' is a single number, make a single request
-      const params = new HttpParams().set('page', pages.toString());
-      return this.http.get<any>(`${environment.api}/users`, { params });
-    }
+  // Fetch user cards based on page number and items per page
+  getUserCards(page: number, perPage: number): Observable<any> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('per_page', perPage.toString());
+    return this.http.get<any>(`${environment.api}/users`, { params });
   }
 
   // Fetch user details by user ID
   getUserDetails(userId: number): Observable<any> {
-    const cacheKey = `userDetails-${userId}`; // Set a unique key for this cache entry
-
-    // Check if data is in the cache
-    const cachedData = this.cachingService.get(cacheKey);
-    if (cachedData) {
-      // Return cached data as an observable
-      return new Observable((observer) => {
-        observer.next(cachedData);
-        observer.complete();
-      });
-    }
-
-    // If not in the cache, proceed with the HTTP request
-    const params = new HttpParams().set('id', userId.toString());
-    return this.http.get<any>(`${environment.api}/users/${userId}`, { params }).pipe(
-      // Cache the result
-      tap(data => this.cachingService.set(cacheKey, data))
-    );
+    return this.http.get<any>(`${environment.api}/users/${userId}`);
   }
 
-  // Cache user cards for a specific cache key
-  cacheUserCards(cacheKey: string, value: any): void {
-    this.cachingService.set(cacheKey, value);
-  }
-
-  // Get cached user cards for a specific cache key
-  getCachedUserCards(cacheKey: string): any {
-    return this.cachingService.get(cacheKey);
-  }
-
-  hasTotalPagesChanged(totalPages: number): boolean {
-    // If lastKnownTotalPages is zero, consider it as changed to force the initial request
-    return this.lastKnownTotalPages !== totalPages && this.lastKnownTotalPages !== 0;
-  }
-
-  updateLastKnownTotalPages(totalPages: number): void {
-    this.lastKnownTotalPages = totalPages;
+  // Initialize and fetch all users (used in HeaderComponent for search)
+  initializeAllUsers(): Observable<User[]> {
+    const perPage = 12; // Max per_page value
+    const params = new HttpParams()
+      .set('page', '1')
+      .set('per_page', perPage.toString());
+    return this.http
+      .get<any>(`${environment.api}/users`, { params })
+      .pipe(map((res) => res.data));
   }
 }

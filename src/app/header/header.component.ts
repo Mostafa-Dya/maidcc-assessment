@@ -1,69 +1,76 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Store, select } from '@ngrx/store';
+import { AppState } from '../store/reducers';
+import * as UserActions from '../store/actions/user.actions';
+import * as UserSelectors from '../store/selectors/user.selectors';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { User } from '../store/models/user.model';
+import { takeUntil } from 'rxjs/operators';
 import { SharedServiceModule } from '../shared-service/shared-service.module';
-import { UserService } from '../services/user.service';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
-  imports: [SharedServiceModule],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
+  standalone:true,
+  imports:[SharedServiceModule],
 })
-export class HeaderComponent {
-  searchTerm: string = '';  // New property for the search term
-  dropdownUsers: any[] = [];
-  isDropdownVisible: boolean = false;
-  isLoading: boolean = false;
+export class HeaderComponent implements OnInit, OnDestroy {
+  searchTerm = '';
+  dropdownUsers: User[] = [];
+  isDropdownVisible = false;
+  isLoading = false;
 
-  constructor(private userService: UserService) { }
+  private searchTermSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+
+  constructor(private store: Store<AppState>) {}
 
   ngOnInit() {
-    // Subscribe to the search term changes and update dropdownUsers accordingly
-    this.userSearch();
+    this.store.dispatch(UserActions.initializeAllUsers());
+
+    this.setupSearchSubscription();
   }
 
-  userSearch() {
-    this.isLoading = true; // Set loading state
-    this.userService.search$.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap(term => {
-        if (term.trim() === '') {
-          this.dropdownUsers = this.userService.allUsers;
-          this.isLoading = false; // Set loading state to false when data is loaded
-        } else {
-          this.dropdownUsers = this.userService.allUsers.filter(user => user.id.toString() === term.trim());
-          this.isLoading = false; // Set loading state to false when data is loaded
-
-        }
-        return [];
-      })
-    ).subscribe(
-      () => {
-      },
-      (error) => {
-        console.error('Error fetching user data:', error);
-        this.isLoading = false; // Set loading state to false in case of an error
-      }
-    );
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  // Handle focus event on the input, showing the dropdown and subscribing to search
+  setupSearchSubscription() {
+    this.searchTermSubject
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((term) => {
+        this.isLoading = true;
+        this.store
+          .pipe(select(UserSelectors.selectAllUsers), takeUntil(this.destroy$))
+          .subscribe((users) => {
+            this.dropdownUsers = users.filter((user) => {
+              const searchLower = term.toLowerCase();
+              return (
+                user.id.toString() === searchLower ||
+                user.first_name.toLowerCase().includes(searchLower) ||
+                user.last_name.toLowerCase().includes(searchLower) ||
+                `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchLower)
+              );
+            });
+            this.isLoading = false;
+          });
+      });
+  }
+
   onInputFocus() {
     this.isDropdownVisible = true;
-    this.userSearch();
   }
 
-  // Handle blur event on the input, hiding the dropdown with a slight delay
   onInputBlur() {
     setTimeout(() => {
       this.isDropdownVisible = false;
     }, 200);
   }
 
-  // Handle input change event, updating the search term in the user service
   onInputChange(value: string) {
-    this.userService.setSearchTerm(value.trim());
+    this.isLoading = true;
+    this.searchTermSubject.next(value.trim());
   }
 }

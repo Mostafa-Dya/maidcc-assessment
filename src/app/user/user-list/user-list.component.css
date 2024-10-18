@@ -1,23 +1,32 @@
 /* user-list.component.css */
 
+.user-card {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
 
-  .user-card {
-    background-color: #fff;
-    padding: 1.5rem;
-    border-radius: 0.375rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-  }
-  
-  .text-align p{
-    margin: auto 8px auto 8px!important;
-  }
+.text-align p {
+  margin: auto 8px auto 8px !important;
+}
 
-  .loader-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0.8);
-  }
+.loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.paginator {
+  justify-content: center !important;
+  display: flex !important;
+  background: none;
+}
+
+:host ::ng-deep .mat-mdc-paginator-page-size {
+  display: none;
+}
